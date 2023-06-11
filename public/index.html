@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JIA Sensor-API</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="filter.css">
+    <script src="index.js" defer></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>
+            Data-view
+        </h1>
+    </header>
+
+    <main>
+        <form class="filter" method="dialog" onsubmit="searchFilter()">
+            <div>
+                <label for="start">Von</label>
+                <input type="datetime-local" name="start" id="start">
+            </div>
+            <div>
+                <label for="end">Bis</label>
+                <input type="datetime-local" id="end" name="end">
+            </div>
+            <article>
+                <button type="submit">Filter</button>
+                <button type="reset">Reset</button>
+            </article>
+        </form>
+
+        <div id="curve_chart" style="width: 80%; min-height: 400px;"></div>
+
+        <table class="data">
+        </table>
+
+        <div class="options"></div>
+
+        <form class="debug" action="/api/room/add" method="post">
+            <style>
+                .debug {
+                    border: 2px solid #fff;
+                    width: 80%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-direction: column;
+                    gap: 10px;
+                    padding: 20px;
+                    box-sizing: border-box
+                }
+
+                .debug * {
+                    width: 100%;
+                }
+
+                .debug input {
+                    height: 24px;
+                }
+            </style>
+            <div>
+                <label for="room">Raum</label>
+                <input type="text" name="room" required id="room">
+            </div>
+            <div>
+                <label for="value">Wert</label>
+                <input type="text" name="value" required id="value">
+            </div>
+            <div>
+                <label for="time">Zeit</label>
+                <input type="datetime-local" name="time" required id="time">
+            </div>
+            <button type="submit">Senden</button>
+        </form>
+    </main>
+
+    <footer>
+        &copy; XY, 2023 &amp;&nbsp;<a href="https://github.com/Barsch2006">Christian F</a>
+    </footer>
+</body>
+
+</html>
