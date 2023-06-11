@@ -35,7 +35,7 @@ function showTable(tableData) {
     var table = document.querySelector(".data");
     table.innerHTML = "";
     var tableHead = document.createElement("tr");
-    tableHead.innerHTML = "<th>Room</th><th>Value</th><th>Timestamp</th>";
+    tableHead.innerHTML = "<th>Name</th><th>Value</th><th>Timestamp</th>";
     table.appendChild(tableHead);
     for (var i = 0; i < tableData.length; i++) {
         var tableRow = document.createElement("tr");
