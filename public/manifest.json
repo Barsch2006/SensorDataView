@@ -1,0 +1,15 @@
+{
+    "name": "GRB JIApp",
+    "short_name": "JIApp",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#222222",
+    "theme_color": "#1E1E1E",
+    "icons": [
+      {
+        "src": "new.svg",
+        "sizes": "32x32"
+      }
+    ]
+  }
+  
