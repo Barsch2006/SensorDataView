@@ -48,7 +48,15 @@
             </article>
         </form>
 
-        <div id="curve_chart" style="width: 80%; min-height: 400px;"></div>
+        <!-- 
+            Make chart scrollable
+         -->
+        <style>
+            #curve_chart {
+                overflow-x: scroll;
+            }
+        </style>
+        <div id="curve_chart" style="min-width: 80%; min-height: 400px;"></div>
 
         <table class="data">
         </table>

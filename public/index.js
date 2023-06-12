@@ -6,10 +6,11 @@ async function searchFilter() {
     data.start = formData.get("start");
     data.end = formData.get("end");
     const newResData = await fetch(`/api/room/${data.start.length > 0 ? data.start : 'all'}/${data.end.length > 0 ? data.end : 'all'}`).then(res => res.json());
-    parseData(newResData);
+    parseData(newResData, data.start, data.end);
 }
 
 function showGraph(graphData) {
+    console.log(graphData);
     // Load the Visualization API and the corechart package.
     google.charts.load('current', { 'packages': ['corechart'] });
     // Set a callback to run when the Google Visualization API is loaded.
@@ -44,7 +45,7 @@ function showTable(tableData) {
     }
 }
 
-async function parseData(data) {
+async function parseData(data, start, end) {
     // sort data by timestamp
     data.sort((a, b) => {
         return a.timestamp.localeCompare(b.timestamp);
@@ -52,19 +53,20 @@ async function parseData(data) {
     // parse the data to a graph
     var graphData = [];
     let head = ["Time"];
-    let rooms = await fetch("/api/rooms").then(res => res.json());
+    let rooms = await getRooms(start, end);
     rooms.forEach(room => {
         head.push(room.name);
     });
     graphData.push(head);
-    graphData.push(...sortData(data));
-    console.log(graphData);
+    graphData.push(...await sortData(data, start, end));
     showGraph(graphData);
     showTable(data);
     optionButtons(data);
 }
 
-function optionButtons(data) {
+function optionButtons(tableData) {
+    // remove the old buttons
+    document.querySelector('.options').innerHTML = "";
     // add a button to download the data as a csv file
     var downloadButton = document.createElement("button");
     downloadButton.innerHTML = "Download as CSV";
@@ -120,7 +122,7 @@ function optionButtons(data) {
     document.querySelector('.options').appendChild(downloadButton);
 }
 
-function sortData(data) {
+async function sortData(data, start, end) {
     // the data is sorted like: [{name: "room1", value: 1, timestamp: "2020-12-12"}, {name: "room2", value: 2, timestamp: "2020-12-12"}]
     // I want to have an array like: [["2020-12-12", 1, 2], ["2020-12-13", 2, 3]]
     var sortedData = [];
@@ -129,9 +131,9 @@ function sortData(data) {
         if (!dates.includes(element.timestamp)) {
             dates.push(element.timestamp);
         }
-    }
-    );
-    dates.forEach(date => {
+    });
+    const rooms = await getRooms(start, end);
+    dates.forEach((date) => {
         var temp = [date];
         data.forEach(element => {
             if (element.timestamp == date) {
@@ -139,8 +141,18 @@ function sortData(data) {
             }
         });
         sortedData.push(temp);
+        // if there is no data for a room on a day the value is null
+        if (temp.length - 1 < rooms.length) {
+            for (var i = temp.length - 1; i < rooms.length; i++) {
+                temp.push(0);
+            }
+        }
     });
     return sortedData;
+}
+
+async function getRooms(start, end) {
+    return await fetch(`/api/rooms/${start.length > 0 ? start : 'all'}/${end.length > 0 ? end : 'all'}`).then(res => res.json());
 }
 
 window.onload = searchFilter();

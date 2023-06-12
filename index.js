@@ -37,14 +37,30 @@ app.post('/api/room/add', (req, res) => {
     });
 });
 
-app.get('/api/rooms', (req, res) => {
-    db.all(`SELECT DISTINCT name FROM room_data`, (err, rows) => {
+app.get('/api/rooms/:start/:end', (req, res) => {
+    let start = req.params.start;
+    let end = req.params.end;
+
+    // if no start is given start is today 00:00:00
+    if (start === 'all') {
+        start = new Date();
+        start.setHours(0, 0, 0, 0);
+        start = start.toISOString();
+    }
+    // if no end is given end is today 23:59:59
+    if (end === 'all') {
+        end = new Date();
+        end.setHours(23, 59, 59, 999);
+        end = end.toISOString();
+    }
+    db.all(`SELECT DISTINCT name FROM room_data WHERE value IS NOT NULL AND timestamp BETWEEN ? AND ?`, [start, end], (err, rows) => {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
         }
         res.status(200).json(rows);
-    });
+    }
+    );
 });
 
 // get the data of a room in a range of time
