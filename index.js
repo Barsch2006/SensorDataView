@@ -1,10 +1,4 @@
 async function searchFilter() {
-    // get the data of the form 
-    var form = document.querySelector(".filter");
-    var formData = new FormData(form);
-    var data = {};
-    data.start = formData.get("start");
-    data.end = formData.get("end");
     const newResData = testdata.api;
     parseData(newResData, data.start, data.end);
 }

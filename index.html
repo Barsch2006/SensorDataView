@@ -34,18 +34,9 @@
 
     <main>
         <form class="filter" method="dialog" onsubmit="searchFilter()">
-            <div>
-                <label for="start">Von</label>
-                <input type="datetime-local" name="start" id="start">
-            </div>
-            <div>
-                <label for="end">Bis</label>
-                <input type="datetime-local" id="end" name="end">
-            </div>
-            <article>
-                <button type="submit">Filter</button>
-                <button type="reset">Reset</button>
-            </article>
+            <h4>
+                Filter ist Im Preview nicht funktionsfähig
+            </h4>
         </form>
 
         <!-- 
@@ -62,43 +53,6 @@
         </table>
 
         <div class="options"></div>
-
-        <form class="debug" action="/api/room/add" method="post">
-            <style>
-                .debug {
-                    border: 2px solid #fff;
-                    width: 80%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    gap: 10px;
-                    padding: 20px;
-                    box-sizing: border-box
-                }
-
-                .debug * {
-                    width: 100%;
-                }
-
-                .debug input {
-                    height: 24px;
-                }
-            </style>
-            <div>
-                <label for="room">Name</label>
-                <input type="text" name="room" required id="room">
-            </div>
-            <div>
-                <label for="value">Wert</label>
-                <input type="text" name="value" required id="value">
-            </div>
-            <div>
-                <label for="time">Zeit</label>
-                <input type="datetime-local" name="time" required id="time">
-            </div>
-            <button type="submit">Senden</button>
-        </form>
     </main>
 
     <footer>
