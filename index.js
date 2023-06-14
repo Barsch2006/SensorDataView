@@ -5,7 +5,7 @@ async function searchFilter() {
     var data = {};
     data.start = formData.get("start");
     data.end = formData.get("end");
-    const newResData = data.api;
+    const newResData = testdata.api;
     parseData(newResData, data.start, data.end);
 }
 
@@ -152,10 +152,10 @@ async function sortData(data, start, end) {
 }
 
 async function getRooms(start, end) {
-    return data.rooms;
+    return testdata.rooms;
 }
 
-const data = {
+const testdata = {
     rooms: [
         {
             name: "C001"
