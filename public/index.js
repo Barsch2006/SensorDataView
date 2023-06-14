@@ -5,7 +5,7 @@ async function searchFilter() {
     var data = {};
     data.start = formData.get("start");
     data.end = formData.get("end");
-    const newResData = await fetch(`/api/room/${data.start.length > 0 ? data.start : 'all'}/${data.end.length > 0 ? data.end : 'all'}`).then(res => res.json());
+    const newResData = data.api;
     parseData(newResData, data.start, data.end);
 }
 
@@ -152,7 +152,68 @@ async function sortData(data, start, end) {
 }
 
 async function getRooms(start, end) {
-    return await fetch(`/api/rooms/${start.length > 0 ? start : 'all'}/${end.length > 0 ? end : 'all'}`).then(res => res.json());
+    return data.rooms;
+}
+
+const data = {
+    rooms: [
+        {
+            name: "C001"
+        },
+        {
+            name: "C002"
+        },
+        {
+            name: "C003"
+        }
+    ],
+    api: [
+        {
+            name: "C001",
+            value: 100,
+            timestamp: "2023-06-14T08:00"
+        },
+        {
+            name: "C002",
+            value: 50,
+            timestamp: "2023-06-14T08:00"
+        },
+        {
+            name: "C003",
+            value: 150,
+            timestamp: "2023-06-14T08:00"
+        },
+        {
+            name: "C001",
+            value: 200,
+            timestamp: "2023-06-14T09:00"
+        },
+        {
+            name: "C002",
+            value: 100,
+            timestamp: "2023-06-14T09:00"
+        },
+        {
+            name: "C003",
+            value: 100,
+            timestamp: "2023-06-14T09:00"
+        },
+        {
+            name: "C001",
+            value: 300,
+            timestamp: "2023-06-14T10:00"
+        },
+        {
+            name: "C002",
+            value: 100,
+            timestamp: "2023-06-14T10:00"
+        },
+        {
+            name: "C003",
+            value: 50,
+            timestamp: "2023-06-14T10:00"
+        }
+    ]
 }
 
 window.onload = searchFilter();
