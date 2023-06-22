@@ -1,97 +1,213 @@
-const { config } = require('dotenv');
-config();
+async function searchFilter() {
+    const newResData = testdata.api;
+    parseData(newResData, newResData.start, newResData.end);
+}
 
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database(process.env.DB ?? './sqlite.db');
+function showGraph(graphData) {
+    console.log(graphData);
+    // Load the Visualization API and the corechart package.
+    google.charts.load('current', { 'packages': ['corechart'] });
+    // Set a callback to run when the Google Visualization API is loaded.
+    google.charts.setOnLoadCallback(drawChart);
 
-db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS room_data (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        value TEXT NOT NULL,
-        timestamp TEXT NOT NULL
-    )`);
-});
+    function drawChart() {
+        var data = google.visualization.arrayToDataTable(graphData);
 
-const express = require('express');
-const app = express();
+        var options = {
+            title: 'JIA Sensor Data',
+            curveType: 'function',
+            legend: { position: 'bottom' }
+        };
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
 
-// insert data from a room
-app.post('/api/room/add', (req, res) => {
-    const room = req.body.room;
-    const value = req.body.value;
-    const timestamp = req.body.time;
-    if (!room || !value || !timestamp) {
-        return;
+        chart.draw(data, options);
     }
+}
 
-    db.run(`INSERT INTO room_data (name, value, timestamp) VALUES (?, ?, ?)`, [room, value, timestamp], (err) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.status(200).redirect('/');
+function showTable(tableData) {
+    // make a table from the data the server sent
+    var table = document.querySelector(".data");
+    table.innerHTML = "";
+    var tableHead = document.createElement("tr");
+    tableHead.innerHTML = "<th>Name</th><th>Value</th><th>Timestamp</th>";
+    table.appendChild(tableHead);
+    for (var i = 0; i < tableData.length; i++) {
+        var tableRow = document.createElement("tr");
+        tableRow.innerHTML = `<td>${tableData[i].name}</td><td>${tableData[i].value}</td><td>${tableData[i].timestamp}</td>`;
+        table.appendChild(tableRow);
+    }
+}
+
+async function parseData(data, start, end) {
+    // sort data by timestamp
+    data.sort((a, b) => {
+        return a.timestamp.localeCompare(b.timestamp);
     });
-});
-
-app.get('/api/rooms/:start/:end', (req, res) => {
-    let start = req.params.start;
-    let end = req.params.end;
-
-    // if no start is given start is today 00:00:00
-    if (start === 'all') {
-        start = new Date();
-        start.setHours(0, 0, 0, 0);
-        start = start.toISOString();
-    }
-    // if no end is given end is today 23:59:59
-    if (end === 'all') {
-        end = new Date();
-        end.setHours(23, 59, 59, 999);
-        end = end.toISOString();
-    }
-    db.all(`SELECT DISTINCT name FROM room_data WHERE value IS NOT NULL AND timestamp BETWEEN ? AND ?`, [start, end], (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.status(200).json(rows);
-    }
-    );
-});
-
-// get the data of a room in a range of time
-app.get('/api/room/:start/:end', (req, res) => {
-    let start = req.params.start;
-    let end = req.params.end;
-
-    // if no start is given start is today 00:00:00
-    if (start === 'all') {
-        start = new Date();
-        start.setHours(0, 0, 0, 0);
-        start = start.toISOString();
-    }
-    // if no end is given end is today 23:59:59
-    if (end === 'all') {
-        end = new Date();
-        end.setHours(23, 59, 59, 999);
-        end = end.toISOString();
-    }
-
-    db.all(`SELECT * FROM room_data WHERE timestamp BETWEEN ? AND ?`, [start, end], (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-        res.status(200).json(rows);
+    // parse the data to a graph
+    var graphData = [];
+    let head = ["Time"];
+    let rooms = await getRooms(start, end);
+    rooms.forEach(room => {
+        head.push(room.name);
     });
-});
+    graphData.push(head);
+    graphData.push(...await sortData(data, start, end));
+    showGraph(graphData);
+    showTable(data);
+    optionButtons(data);
+}
 
-app.use(express.static('public'));
+function optionButtons(tableData) {
+    // remove the old buttons
+    document.querySelector('.options').innerHTML = "";
+    // add a button to download the data as a csv file
+    var downloadButton = document.createElement("button");
+    downloadButton.innerHTML = "Download as CSV";
+    downloadButton.addEventListener("click", () => {
+        var csv = "Room,Value,Timestamp\n";
+        tableData.forEach(element => {
+            csv += `${element.name},${element.value},${element.timestamp}\n`;
+        });
+        var hiddenElement = document.createElement('a');
+        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+        hiddenElement.target = '_blank';
+        hiddenElement.download = 'data.csv';
+        hiddenElement.click();
+    });
+    document.querySelector('.options').appendChild(downloadButton);
+    // add a button to download the graph as a png file
+    var downloadButton = document.createElement("button");
+    downloadButton.innerHTML = "Download as PNG";
+    downloadButton.addEventListener("click", () => {
+        var svg = document.querySelector('svg');
+        var canvas = document.createElement('canvas');
+        canvas.width = svg.width.baseVal.value;
+        canvas.height = svg.height.baseVal.value;
+        var ctx = canvas.getContext('2d');
+        var data = (new XMLSerializer()).serializeToString(svg);
+        var DOMURL = window.URL || window.webkitURL || window;
+        var img = new Image();
+        var svgBlob = new Blob([data], { type: 'image/svg+xml;charset=utf-8' });
+        var url = DOMURL.createObjectURL(svgBlob);
+        img.onload = function () {
+            ctx.drawImage(img, 0, 0);
+            DOMURL.revokeObjectURL(url);
+            var imgURI = canvas
+                .toDataURL('image/png')
+                .replace('image/png', 'image/octet-stream');
+            triggerDownload(imgURI);
+            // triggerDownload function
+            function triggerDownload(imgURI) {
+                var evt = new MouseEvent('click', {
+                    view: window,
+                    bubbles: false,
+                    cancelable: true
+                });
+                var a = document.createElement('a');
+                a.setAttribute('download', 'graph.png');
+                a.setAttribute('href', imgURI);
+                a.setAttribute('target', '_blank');
+                a.dispatchEvent(evt);
+            }
+        };
+        img.src = url;
+    });
+    document.querySelector('.options').appendChild(downloadButton);
+}
 
-app.listen(process.env.PORT ?? 1337, () => {
-    console.log(`Server running on port ${process.env.PORT ?? 1337}`)
-});
+async function sortData(data, start, end) {
+    // the data is sorted like: [{name: "room1", value: 1, timestamp: "2020-12-12"}, {name: "room2", value: 2, timestamp: "2020-12-12"}]
+    // I want to have an array like: [["2020-12-12", 1, 2], ["2020-12-13", 2, 3]]
+    var sortedData = [];
+    var dates = [];
+    data.forEach(element => {
+        if (!dates.includes(element.timestamp)) {
+            dates.push(element.timestamp);
+        }
+    });
+    const rooms = await getRooms(start, end);
+    dates.forEach((date) => {
+        var temp = [date];
+        data.forEach(element => {
+            if (element.timestamp == date) {
+                temp.push(parseFloat(element.value));
+            }
+        });
+        sortedData.push(temp);
+        // if there is no data for a room on a day the value is null
+        if (temp.length - 1 < rooms.length) {
+            for (var i = temp.length - 1; i < rooms.length; i++) {
+                temp.push(0);
+            }
+        }
+    });
+    return sortedData;
+}
+
+async function getRooms(start, end) {
+    return testdata.rooms;
+}
+
+const testdata = {
+    rooms: [
+        {
+            name: "C001"
+        },
+        {
+            name: "C002"
+        },
+        {
+            name: "C003"
+        }
+    ],
+    api: [
+        {
+            name: "C001",
+            value: 100,
+            timestamp: "2023-06-14T08:00"
+        },
+        {
+            name: "C002",
+            value: 50,
+            timestamp: "2023-06-14T08:00"
+        },
+        {
+            name: "C003",
+            value: 150,
+            timestamp: "2023-06-14T08:00"
+        },
+        {
+            name: "C001",
+            value: 200,
+            timestamp: "2023-06-14T09:00"
+        },
+        {
+            name: "C002",
+            value: 100,
+            timestamp: "2023-06-14T09:00"
+        },
+        {
+            name: "C003",
+            value: 100,
+            timestamp: "2023-06-14T09:00"
+        },
+        {
+            name: "C001",
+            value: 300,
+            timestamp: "2023-06-14T10:00"
+        },
+        {
+            name: "C002",
+            value: 100,
+            timestamp: "2023-06-14T10:00"
+        },
+        {
+            name: "C003",
+            value: 50,
+            timestamp: "2023-06-14T10:00"
+        }
+    ]
+}
+
+window.onload = searchFilter();

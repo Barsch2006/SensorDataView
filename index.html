@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JIA Sensor-API</title>
+    <link rel="shortcut icon" href="new.svg">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="filter.css">
+    <script src="index.js" defer></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <link rel="manifest" href="manifest.json">
+</head>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('worker.js')
+            .then(registration => {
+                console.log('Web Worker wurde registriert:', registration);
+            })
+            .catch(error => {
+                console.error('Fehler beim Registrieren des Web Workers:', error);
+            });
+    }
+</script>
+
+<body>
+    <header>
+        <h1>
+            Data-view
+        </h1>
+    </header>
+
+    <main>
+        <form class="filter" method="dialog" onsubmit="searchFilter()">
+            <h4>
+                Filter ist Im Preview nicht funktionsfähig
+            </h4>
+        </form>
+
+        <!-- 
+            Make chart scrollable
+         -->
+        <style>
+            #curve_chart {
+                overflow-x: scroll;
+            }
+        </style>
+        <div id="curve_chart" style="min-width: 80%; min-height: 400px;"></div>
+
+        <table class="data">
+        </table>
+
+        <div class="options"></div>
+    </main>
+
+    <footer>
+        &copy; XY, 2023 &amp;&nbsp;<a href="https://github.com/Barsch2006">Christian F</a>
+    </footer>
+</body>
+
+</html>
