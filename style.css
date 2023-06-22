@@ -42,6 +42,11 @@ header * {
   margin-right: 14px;
 }
 
+header img {
+  height: calc(var(--header-height) - 10px);
+  width: auto;
+}
+
 main {
   margin-top: var(--header-height);
   min-height: calc(100vh - var(--header-height));
