@@ -1,6 +1,6 @@
 async function searchFilter() {
     const newResData = testdata.api;
-    parseData(newResData, data.start, data.end);
+    parseData(newResData, newResData.start, newResData.end);
 }
 
 function showGraph(graphData) {
