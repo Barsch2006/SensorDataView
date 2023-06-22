@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 
 <head>
     <meta charset="UTF-8">
@@ -10,20 +10,7 @@
     <link rel="stylesheet" href="filter.css">
     <script src="index.js" defer></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <link rel="manifest" href="manifest.json">
 </head>
-
-<script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('worker.js')
-            .then(registration => {
-                console.log('Web Worker wurde registriert:', registration);
-            })
-            .catch(error => {
-                console.error('Fehler beim Registrieren des Web Workers:', error);
-            });
-    }
-</script>
 
 <body>
     <header>
